@@ -1,12 +1,16 @@
 import json
 import time
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
+from telegram.ext import (
+    ApplicationBuilder,
+    MessageHandler,
+    ContextTypes,
+    filters,
+)
 
 TOKEN = "8842476005:AAFpOY9lJ1TDUiV0i0vaFJ1HHS_WCfvw6_U"
 
 COOLDOWN_SECONDS = 10
-
 last_trigger_time = 0
 
 
