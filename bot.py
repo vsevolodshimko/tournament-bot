@@ -50,3 +50,4 @@ app.add_handler(
 print("Бот запущен!")
 
 app.run_polling()
+# test
