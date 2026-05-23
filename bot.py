@@ -12,7 +12,7 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = "ТВОЙ_ТОКЕН_БОТА"
+TOKEN = "8842476005:AAErC0IaMd1AlLG-LiXzQuXe5yq-dGcyPQ8"
 
 COOLDOWN_SECONDS = 10
 last_trigger_time = 0
