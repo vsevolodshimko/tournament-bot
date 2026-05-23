@@ -1,5 +1,9 @@
 import json
 import time
+import os
+from threading import Thread
+from flask import Flask
+
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -8,16 +12,44 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = "8842476005:AAFpOY9lJ1TDUiV0i0vaFJ1HHS_WCfvw6_U"
+TOKEN = "ТВОЙ_ТОКЕН_БОТА"
 
 COOLDOWN_SECONDS = 10
 last_trigger_time = 0
 
 
+# =========================
+# Flask server для Render
+# =========================
+
+app_web = Flask('')
+
+
+@app_web.route('/')
+def home():
+    return "Bot is running"
+
+
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    app_web.run(host='0.0.0.0', port=port)
+
+
+Thread(target=run_web).start()
+
+
+# =========================
+# Загрузка qa.json
+# =========================
+
 def load_qa():
     with open("qa.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
+
+# =========================
+# Обработка сообщений
+# =========================
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global last_trigger_time
@@ -41,6 +73,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 last_trigger_time = current_time
                 return
 
+
+# =========================
+# Запуск бота
+# =========================
 
 print("Бот запускается...")
 print(f"Кулдаун между ответами: {COOLDOWN_SECONDS} секунд")
