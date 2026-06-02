@@ -12,6 +12,7 @@ from telegram.ext import (
 
 TOKEN = "8842476005:AAErC0IaMd1AlLG-LiXzQuXe5yq-dGcyPQ8"
 CURRENT_SEASON = "25/26"
+print("=== NEW VERSION LOADED ===")
 
 # =========================
 # Flask
