@@ -10,7 +10,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
-TOKEN = "ТВОЙ_ТОКЕН"
+TOKEN = "8842476005:AAErC0IaMd1AlLG-LiXzQuXe5yq-dGcyPQ8"
 CURRENT_SEASON = "25/26"
 
 # =========================
