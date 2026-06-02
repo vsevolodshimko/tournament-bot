@@ -11,8 +11,8 @@ from telegram.ext import (
 )
 
 TOKEN = "8842476005:AAErC0IaMd1AlLG-LiXzQuXe5yq-dGcyPQ8"
+ADMIN_ID = 509816654
 CURRENT_SEASON = "25/26"
-print("=== NEW VERSION LOADED ===")
 
 # =========================
 # Flask
@@ -43,6 +43,11 @@ def load_ratings():
         return json.load(f)
 
 
+def save_ratings(data):
+    with open("ratings.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+
 def calculate_score(player):
     return (
         player["gold"] * 4
@@ -52,8 +57,6 @@ def calculate_score(player):
 
 
 def format_rating(players):
-    result = []
-
     sorted_players = sorted(
         players.items(),
         key=lambda x: (
@@ -65,33 +68,46 @@ def format_rating(players):
         reverse=True
     )
 
-    for index, (username, data) in enumerate(sorted_players, start=1):
+    result = []
 
+    for pos, (username, data) in enumerate(
+        sorted_players,
+        start=1
+    ):
         total = (
             data["gold"]
             + data["silver"]
             + data["bronze"]
         )
 
-        line = (
-            f"{index}. {total} медалей "
+        if pos == 1:
+            place = "🥇"
+        elif pos == 2:
+            place = "🥈"
+        elif pos == 3:
+            place = "🥉"
+        else:
+            place = f"{pos}."
+
+        result.append(
+            f"{place} {total} медалей "
             f"({data['gold']}🥇, "
             f"{data['silver']}🥈, "
             f"{data['bronze']}🥉)\n"
             f"{username}"
         )
 
-        result.append(line)
-
     return "\n\n".join(result)
 
 
 # =========================
-# Commands
+# User commands
 # =========================
 
-async def seasons(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = (
+async def seasons(update: Update,
+                  context: ContextTypes.DEFAULT_TYPE):
+
+    await update.message.reply_text(
         "📚 Доступные сезоны:\n\n"
         "🔴 25/26\n"
         "🔴 24/25\n"
@@ -99,10 +115,10 @@ async def seasons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔴 22/23"
     )
 
-    await update.message.reply_text(text)
 
+async def rating(update: Update,
+                 context: ContextTypes.DEFAULT_TYPE):
 
-async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ratings = load_ratings()
 
     season = CURRENT_SEASON
@@ -111,13 +127,16 @@ async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
         season = context.args[0]
 
     if season not in ratings:
-        await update.message.reply_text("❌ Сезон не найден")
+        await update.message.reply_text(
+            "❌ Сезон не найден"
+        )
         return
 
-    text = f"🔴 СЕЗОН {season} 🔴\n\n"
+    text = f"🔴 {season} СЕЗОН 🔴\n\n"
 
     if "solo" in ratings[season]:
-        text += "🏆 1x1\n\n"
+
+        text += "🏆 1×1\n\n"
 
         if ratings[season]["solo"]:
             text += format_rating(
@@ -127,7 +146,8 @@ async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text += "Нет данных"
 
     if "duo" in ratings[season]:
-        text += "\n\n🤝 2x2\n\n"
+
+        text += "\n\n🤝 2×2\n\n"
 
         if ratings[season]["duo"]:
             text += format_rating(
@@ -137,6 +157,110 @@ async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text += "Нет данных"
 
     await update.message.reply_text(text)
+
+
+# =========================
+# Medal system
+# =========================
+
+async def add_medal(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    mode,
+    medal
+):
+
+    if update.effective_user.id != ADMIN_ID:
+        await update.message.reply_text(
+            "⛔ Нет доступа"
+        )
+        return
+
+    if not context.args:
+
+        await update.message.reply_text(
+            "Пример:\n/gold1v1 @nickname"
+        )
+        return
+
+    username = context.args[0]
+
+    if not username.startswith("@"):
+        username = "@" + username
+
+    ratings = load_ratings()
+
+    season = ratings[CURRENT_SEASON]
+
+    if username not in season[mode]:
+
+        season[mode][username] = {
+            "gold": 0,
+            "silver": 0,
+            "bronze": 0
+        }
+
+    season[mode][username][medal] += 1
+
+    save_ratings(ratings)
+
+    await update.message.reply_text(
+        f"✅ Медаль выдана игроку {username}"
+    )
+
+
+async def gold1v1(update, context):
+    await add_medal(
+        update,
+        context,
+        "solo",
+        "gold"
+    )
+
+
+async def silver1v1(update, context):
+    await add_medal(
+        update,
+        context,
+        "solo",
+        "silver"
+    )
+
+
+async def bronze1v1(update, context):
+    await add_medal(
+        update,
+        context,
+        "solo",
+        "bronze"
+    )
+
+
+async def gold2v2(update, context):
+    await add_medal(
+        update,
+        context,
+        "duo",
+        "gold"
+    )
+
+
+async def silver2v2(update, context):
+    await add_medal(
+        update,
+        context,
+        "duo",
+        "silver"
+    )
+
+
+async def bronze2v2(update, context):
+    await add_medal(
+        update,
+        context,
+        "duo",
+        "bronze"
+    )
 
 
 # =========================
@@ -152,8 +276,6 @@ app.add_handler(
 app.add_handler(
     CommandHandler("rating", rating)
 )
-
-print("Bot started")
 
 app.add_handler(
     CommandHandler("gold1v1", gold1v1)
@@ -178,72 +300,7 @@ app.add_handler(
 app.add_handler(
     CommandHandler("bronze2v2", bronze2v2)
 )
+
+print("Bot started")
+
 app.run_polling()
-def save_ratings(data):
-    with open("ratings.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-
-async def add_medal(update: Update,
-                    context: ContextTypes.DEFAULT_TYPE,
-                    mode,
-                    medal):
-
-    ADMIN_ID = 509816654
-
-    if update.effective_user.id != ADMIN_ID:
-        return
-
-    if not context.args:
-        await update.message.reply_text(
-            "Использование:\n/gold1v1 @username"
-        )
-        return
-
-    username = context.args[0]
-
-    if not username.startswith("@"):
-        username = "@" + username
-
-    ratings = load_ratings()
-
-    season = ratings["25/26"]
-
-    if username not in season[mode]:
-        season[mode][username] = {
-            "gold": 0,
-            "silver": 0,
-            "bronze": 0
-        }
-
-    season[mode][username][medal] += 1
-
-    save_ratings(ratings)
-
-    await update.message.reply_text(
-        f"✅ {username} получил {medal}"
-    )
-
-
-async def gold1v1(update, context):
-    await add_medal(update, context, "solo", "gold")
-
-
-async def silver1v1(update, context):
-    await add_medal(update, context, "solo", "silver")
-
-
-async def bronze1v1(update, context):
-    await add_medal(update, context, "solo", "bronze")
-
-
-async def gold2v2(update, context):
-    await add_medal(update, context, "duo", "gold")
-
-
-async def silver2v2(update, context):
-    await add_medal(update, context, "duo", "silver")
-
-
-async def bronze2v2(update, context):
-    await add_medal(update, context, "duo", "bronze")
