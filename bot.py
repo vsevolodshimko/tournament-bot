@@ -145,11 +145,11 @@ async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(
-    CommandHandler("сезоны", seasons)
+    CommandHandler("seasons", seasons)
 )
 
 app.add_handler(
-    CommandHandler("рейтинг", rating)
+    CommandHandler("rating", rating)
 )
 
 print("Bot started")
