@@ -1,5 +1,4 @@
 import json
-import time
 import os
 from threading import Thread
 from flask import Flask
@@ -7,86 +6,152 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
-    MessageHandler,
+    CommandHandler,
     ContextTypes,
-    filters,
 )
 
-TOKEN = "8842476005:AAErC0IaMd1AlLG-LiXzQuXe5yq-dGcyPQ8"
-
-COOLDOWN_SECONDS = 10
-last_trigger_time = 0
-
+TOKEN = "ТВОЙ_ТОКЕН"
+CURRENT_SEASON = "25/26"
 
 # =========================
-# Flask server для Render
+# Flask
 # =========================
 
-app_web = Flask('')
+app_web = Flask("")
 
 
-@app_web.route('/')
+@app_web.route("/")
 def home():
     return "Bot is running"
 
 
 def run_web():
     port = int(os.environ.get("PORT", 10000))
-    app_web.run(host='0.0.0.0', port=port)
+    app_web.run(host="0.0.0.0", port=port)
 
 
 Thread(target=run_web).start()
 
 
 # =========================
-# Загрузка qa.json
+# Ratings
 # =========================
 
-def load_qa():
-    with open("qa.json", "r", encoding="utf-8") as f:
+def load_ratings():
+    with open("ratings.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
 
+def calculate_score(player):
+    return (
+        player["gold"] * 4
+        + player["silver"] * 2
+        + player["bronze"]
+    )
+
+
+def format_rating(players):
+    result = []
+
+    sorted_players = sorted(
+        players.items(),
+        key=lambda x: (
+            calculate_score(x[1]),
+            x[1]["gold"],
+            x[1]["silver"],
+            x[1]["bronze"]
+        ),
+        reverse=True
+    )
+
+    for index, (username, data) in enumerate(sorted_players, start=1):
+
+        total = (
+            data["gold"]
+            + data["silver"]
+            + data["bronze"]
+        )
+
+        line = (
+            f"{index}. {total} медалей "
+            f"({data['gold']}🥇, "
+            f"{data['silver']}🥈, "
+            f"{data['bronze']}🥉)\n"
+            f"{username}"
+        )
+
+        result.append(line)
+
+    return "\n\n".join(result)
+
+
 # =========================
-# Обработка сообщений
+# Commands
 # =========================
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global last_trigger_time
+async def seasons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = (
+        "📚 Доступные сезоны:\n\n"
+        "🔴 25/26\n"
+        "🔴 24/25\n"
+        "🔴 23/24\n"
+        "🔴 22/23"
+    )
 
-    if not update.message or not update.message.text:
+    await update.message.reply_text(text)
+
+
+async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    ratings = load_ratings()
+
+    season = CURRENT_SEASON
+
+    if context.args:
+        season = context.args[0]
+
+    if season not in ratings:
+        await update.message.reply_text("❌ Сезон не найден")
         return
 
-    current_time = time.time()
+    text = f"🔴 СЕЗОН {season} 🔴\n\n"
 
-    if current_time - last_trigger_time < COOLDOWN_SECONDS:
-        return
+    if "solo" in ratings[season]:
+        text += "🏆 1x1\n\n"
 
-    text = update.message.text.lower()
+        if ratings[season]["solo"]:
+            text += format_rating(
+                ratings[season]["solo"]
+            )
+        else:
+            text += "Нет данных"
 
-    qa_data = load_qa()
+    if "duo" in ratings[season]:
+        text += "\n\n🤝 2x2\n\n"
 
-    for item in qa_data:
-        for keyword in item["keywords"]:
-            if keyword.lower() in text:
-                await update.message.reply_text(item["answer"])
-                last_trigger_time = current_time
-                return
+        if ratings[season]["duo"]:
+            text += format_rating(
+                ratings[season]["duo"]
+            )
+        else:
+            text += "Нет данных"
+
+    await update.message.reply_text(text)
 
 
 # =========================
-# Запуск бота
+# Start bot
 # =========================
-
-print("Бот запускается...")
-print(f"Кулдаун между ответами: {COOLDOWN_SECONDS} секунд")
 
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(
-    MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
+    CommandHandler("сезоны", seasons)
 )
 
-print("Бот запущен!")
+app.add_handler(
+    CommandHandler("рейтинг", rating)
+)
+
+print("Bot started")
 
 app.run_polling()
