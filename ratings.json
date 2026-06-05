@@ -1,15 +1,81 @@
 {
   "25/26": {
-    "solo": {},
-    "duo": {}
+    "solo": {
+      "@ddmstw": {"gold":1,"silver":0,"bronze":0},
+      "@Just_ganer": {"gold":1,"silver":0,"bronze":0},
+      "@KidochekS": {"gold":1,"silver":0,"bronze":0},
+      "@menrulef": {"gold":1,"silver":0,"bronze":0},
+      "@Time1sNotKind": {"gold":0,"silver":2,"bronze":0},
+      "@sevaes": {"gold":0,"silver":1,"bronze":1},
+      "@MiheyProtas": {"gold":0,"silver":1,"bronze":0},
+      "@emichh": {"gold":0,"silver":0,"bronze":1},
+      "@abcdetkd16": {"gold":0,"silver":0,"bronze":1},
+      "@Jdirbs": {"gold":0,"silver":0,"bronze":1}
+    },
+    "duo": {
+      "@KidochekS": {"gold":1,"silver":0,"bronze":0},
+      "@Time1sNotKind": {"gold":1,"silver":0,"bronze":0},
+      "@lostxxxsoul": {"gold":1,"silver":0,"bronze":0},
+      "@sevaes": {"gold":1,"silver":0,"bronze":0},
+      "@kucherukson": {"gold":0,"silver":1,"bronze":0},
+      "@Jdirbs": {"gold":0,"silver":1,"bronze":0},
+      "@prosto4yva4ok": {"gold":0,"silver":1,"bronze":0},
+      "@Stas_zwd": {"gold":0,"silver":1,"bronze":0},
+      "@temka_0579": {"gold":0,"silver":0,"bronze":1},
+      "@MiheyProtas": {"gold":0,"silver":0,"bronze":1},
+      "@gusnaxH": {"gold":0,"silver":0,"bronze":1},
+      "@mr_jsu": {"gold":0,"silver":0,"bronze":1}
+    }
   },
+
   "24/25": {
-    "solo": {}
+    "solo": {
+      "@BogdanGostichko": {"gold":2,"silver":1,"bronze":1},
+      "@sevaes": {"gold":1,"silver":1,"bronze":1},
+      "@Vitya7374": {"gold":1,"silver":1,"bronze":0},
+      "@giviiiiii": {"gold":1,"silver":0,"bronze":0},
+      "@Futtop06": {"gold":1,"silver":0,"bronze":0},
+      "@Inqoter": {"gold":1,"silver":0,"bronze":0},
+      "@Mbappe_501": {"gold":0,"silver":1,"bronze":0},
+      "@EFOotbalL1612": {"gold":0,"silver":1,"bronze":0},
+      "@Time1sNotKind": {"gold":0,"silver":1,"bronze":0}
+    }
   },
+
   "23/24": {
-    "solo": {}
+    "solo": {
+      "@Vitya7374": {"gold":5,"silver":3,"bronze":3},
+      "@BogdanGostichko": {"gold":3,"silver":4,"bronze":0},
+      "@Inqoter": {"gold":3,"silver":2,"bronze":1},
+      "@Thierry_Henryy": {"gold":3,"silver":1,"bronze":2},
+      "@Sevaes": {"gold":2,"silver":1,"bronze":0},
+      "@KidokSashka": {"gold":2,"silver":1,"bronze":0},
+      "@erfyUA": {"gold":1,"silver":2,"bronze":0},
+      "@Dondarrion1": {"gold":1,"silver":1,"bronze":0},
+      "@Kurt_0000": {"gold":1,"silver":0,"bronze":0},
+      "@Mexico1488": {"gold":1,"silver":0,"bronze":0},
+      "@Konoplyan_K": {"gold":1,"silver":0,"bronze":0},
+      "@Andriy9669": {"gold":1,"silver":0,"bronze":0},
+      "@lostxxxsoul": {"gold":0,"silver":3,"bronze":0},
+      "@rodionmee": {"gold":0,"silver":2,"bronze":1},
+      "@red_vipe": {"gold":0,"silver":1,"bronze":0},
+      "@Simon17uk": {"gold":0,"silver":1,"bronze":0}
+    }
   },
+
   "22/23": {
-    "solo": {}
+    "solo": {
+      "@Sevaes": {"gold":15,"silver":0,"bronze":0},
+      "@Spr969": {"gold":3,"silver":0,"bronze":0},
+      "@radc_r7": {"gold":2,"silver":0,"bronze":0},
+      "@kshlk": {"gold":2,"silver":0,"bronze":0},
+      "@KidokSashka": {"gold":1,"silver":3,"bronze":0},
+      "@lostxxxsoul": {"gold":1,"silver":0,"bronze":0},
+      "@d1monchik_7": {"gold":0,"silver":2,"bronze":0},
+      "@Qwertyuiopasdfghjklzxcqw": {"gold":0,"silver":2,"bronze":0},
+      "@Mik_bonew": {"gold":0,"silver":1,"bronze":0},
+      "@Rovnypac": {"gold":0,"silver":1,"bronze":0},
+      "@Dondarrion1": {"gold":0,"silver":1,"bronze":0}
+    }
   }
 }
