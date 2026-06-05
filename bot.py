@@ -98,24 +98,9 @@ def format_rating(players):
 # Commands
 # =========================
 
-async def seasons(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "📚 Сезоны:\n\n"
-        "/rating 25/26\n"
-        "/rating 24/25\n"
-        "/rating 23/24\n"
-        "/rating 22/23"
-    )
-
-
-async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def show_season(update, season):
 
     ratings = load_ratings()
-
-    season = CURRENT_SEASON
-
-    if context.args:
-        season = context.args[0]
 
     if season not in ratings:
         await update.message.reply_text("❌ Сезон не найден")
@@ -144,8 +129,35 @@ async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text)
 
 
+async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await show_season(update, "25/26")
+
+
+async def s2425(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await show_season(update, "24/25")
+
+
+async def s2324(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await show_season(update, "23/24")
+
+
+async def s2223(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await show_season(update, "22/23")
+
+
+async def seasons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await update.message.reply_text(
+        "📚 Архив сезонов:\n\n"
+        "/rating — текущий сезон 25/26\n\n"
+        "/s2425 — сезон 24/25\n"
+        "/s2324 — сезон 23/24\n"
+        "/s2223 — сезон 22/23"
+    )
+
+
 # =========================
-# выдача медалей
+# Выдача медалей
 # =========================
 
 async def add_medal(update, context, mode, medal):
@@ -216,8 +228,12 @@ async def bronze2v2(update, context):
 
 app = ApplicationBuilder().token(TOKEN).build()
 
-app.add_handler(CommandHandler("seasons", seasons))
 app.add_handler(CommandHandler("rating", rating))
+app.add_handler(CommandHandler("seasons", seasons))
+
+app.add_handler(CommandHandler("s2425", s2425))
+app.add_handler(CommandHandler("s2324", s2324))
+app.add_handler(CommandHandler("s2223", s2223))
 
 app.add_handler(CommandHandler("gold1v1", gold1v1))
 app.add_handler(CommandHandler("silver1v1", silver1v1))
