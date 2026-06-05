@@ -221,6 +221,69 @@ async def silver2v2(update, context):
 async def bronze2v2(update, context):
     await add_medal(update, context, "duo", "bronze")
 
+async def remove_medal(update, context, mode, medal):
+
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    if len(context.args) < 1:
+        await update.message.reply_text(
+            "Пример:\n/removegold1v1 @nickname"
+        )
+        return
+
+    username = context.args[0]
+
+    if not username.startswith("@"):
+        username = "@" + username
+
+    ratings = load_ratings()
+
+    season = ratings[CURRENT_SEASON]
+
+    if username not in season[mode]:
+        await update.message.reply_text(
+            "❌ Игрок не найден"
+        )
+        return
+
+    if season[mode][username][medal] <= 0:
+        await update.message.reply_text(
+            "❌ У игрока нет такой медали"
+        )
+        return
+
+    season[mode][username][medal] -= 1
+
+    save_ratings(ratings)
+
+    await update.message.reply_text(
+        f"➖ У {username} забрана медаль"
+    )
+
+
+async def removegold1v1(update, context):
+    await remove_medal(update, context, "solo", "gold")
+
+
+async def removesilver1v1(update, context):
+    await remove_medal(update, context, "solo", "silver")
+
+
+async def removebronze1v1(update, context):
+    await remove_medal(update, context, "solo", "bronze")
+
+
+async def removegold2v2(update, context):
+    await remove_medal(update, context, "duo", "gold")
+
+
+async def removesilver2v2(update, context):
+    await remove_medal(update, context, "duo", "silver")
+
+
+async def removebronze2v2(update, context):
+    await remove_medal(update, context, "duo", "bronze")
 
 # =========================
 # Start
@@ -242,6 +305,14 @@ app.add_handler(CommandHandler("bronze1v1", bronze1v1))
 app.add_handler(CommandHandler("gold2v2", gold2v2))
 app.add_handler(CommandHandler("silver2v2", silver2v2))
 app.add_handler(CommandHandler("bronze2v2", bronze2v2))
+
+app.add_handler(CommandHandler("removegold1v1", removegold1v1))
+app.add_handler(CommandHandler("removesilver1v1", removesilver1v1))
+app.add_handler(CommandHandler("removebronze1v1", removebronze1v1))
+
+app.add_handler(CommandHandler("removegold2v2", removegold2v2))
+app.add_handler(CommandHandler("removesilver2v2", removesilver2v2))
+app.add_handler(CommandHandler("removebronze2v2", removebronze2v2))
 
 print("BOT STARTED")
 
