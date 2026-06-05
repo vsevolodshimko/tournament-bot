@@ -31,7 +31,7 @@ def run_web():
     app_web.run(host="0.0.0.0", port=port)
 
 
-Thread(target=run_web).start()
+Thread(target=run_web, daemon=True).start()
 
 
 # =========================
@@ -48,19 +48,15 @@ def save_ratings(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def calculate_score(player):
-    return (
-        player["gold"] * 4
-        + player["silver"] * 2
-        + player["bronze"]
-    )
+def score(data):
+    return data["gold"] * 4 + data["silver"] * 2 + data["bronze"]
 
 
 def format_rating(players):
     sorted_players = sorted(
         players.items(),
         key=lambda x: (
-            calculate_score(x[1]),
+            score(x[1]),
             x[1]["gold"],
             x[1]["silver"],
             x[1]["bronze"]
@@ -68,16 +64,14 @@ def format_rating(players):
         reverse=True
     )
 
-    result = []
+    text = ""
 
-    for pos, (username, data) in enumerate(
-        sorted_players,
-        start=1
-    ):
+    for pos, (username, medals) in enumerate(sorted_players, start=1):
+
         total = (
-            data["gold"]
-            + data["silver"]
-            + data["bronze"]
+            medals["gold"]
+            + medals["silver"]
+            + medals["bronze"]
         )
 
         if pos == 1:
@@ -89,35 +83,32 @@ def format_rating(players):
         else:
             place = f"{pos}."
 
-        result.append(
+        text += (
             f"{place} {total} медалей "
-            f"({data['gold']}🥇, "
-            f"{data['silver']}🥈, "
-            f"{data['bronze']}🥉)\n"
-            f"{username}"
+            f"({medals['gold']}🥇, "
+            f"{medals['silver']}🥈, "
+            f"{medals['bronze']}🥉)\n"
+            f"{username}\n\n"
         )
 
-    return "\n\n".join(result)
+    return text
 
 
 # =========================
-# User commands
+# Commands
 # =========================
 
-async def seasons(update: Update,
-                  context: ContextTypes.DEFAULT_TYPE):
-
+async def seasons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "📚 Доступные сезоны:\n\n"
-        "🔴 25/26\n"
-        "🔴 24/25\n"
-        "🔴 23/24\n"
-        "🔴 22/23"
+        "📚 Сезоны:\n\n"
+        "/rating 25/26\n"
+        "/rating 24/25\n"
+        "/rating 23/24\n"
+        "/rating 22/23"
     )
 
 
-async def rating(update: Update,
-                 context: ContextTypes.DEFAULT_TYPE):
+async def rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     ratings = load_ratings()
 
@@ -127,9 +118,7 @@ async def rating(update: Update,
         season = context.args[0]
 
     if season not in ratings:
-        await update.message.reply_text(
-            "❌ Сезон не найден"
-        )
+        await update.message.reply_text("❌ Сезон не найден")
         return
 
     text = f"🔴 {season} СЕЗОН 🔴\n\n"
@@ -142,41 +131,29 @@ async def rating(update: Update,
             text += format_rating(
                 ratings[season]["solo"]
             )
-        else:
-            text += "Нет данных"
 
     if "duo" in ratings[season]:
 
-        text += "\n\n🤝 2×2\n\n"
+        text += "\n🤝 2×2\n\n"
 
         if ratings[season]["duo"]:
             text += format_rating(
                 ratings[season]["duo"]
             )
-        else:
-            text += "Нет данных"
 
     await update.message.reply_text(text)
 
 
 # =========================
-# Medal system
+# выдача медалей
 # =========================
 
-async def add_medal(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-    mode,
-    medal
-):
+async def add_medal(update, context, mode, medal):
 
     if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text(
-            "⛔ Нет доступа"
-        )
         return
 
-    if not context.args:
+    if len(context.args) < 1:
 
         await update.message.reply_text(
             "Пример:\n/gold1v1 @nickname"
@@ -205,102 +182,51 @@ async def add_medal(
     save_ratings(ratings)
 
     await update.message.reply_text(
-        f"✅ Медаль выдана игроку {username}"
+        f"✅ {username} получил {medal}"
     )
 
 
 async def gold1v1(update, context):
-    await add_medal(
-        update,
-        context,
-        "solo",
-        "gold"
-    )
+    await add_medal(update, context, "solo", "gold")
 
 
 async def silver1v1(update, context):
-    await add_medal(
-        update,
-        context,
-        "solo",
-        "silver"
-    )
+    await add_medal(update, context, "solo", "silver")
 
 
 async def bronze1v1(update, context):
-    await add_medal(
-        update,
-        context,
-        "solo",
-        "bronze"
-    )
+    await add_medal(update, context, "solo", "bronze")
 
 
 async def gold2v2(update, context):
-    await add_medal(
-        update,
-        context,
-        "duo",
-        "gold"
-    )
+    await add_medal(update, context, "duo", "gold")
 
 
 async def silver2v2(update, context):
-    await add_medal(
-        update,
-        context,
-        "duo",
-        "silver"
-    )
+    await add_medal(update, context, "duo", "silver")
 
 
 async def bronze2v2(update, context):
-    await add_medal(
-        update,
-        context,
-        "duo",
-        "bronze"
-    )
+    await add_medal(update, context, "duo", "bronze")
 
 
 # =========================
-# Start bot
+# Start
 # =========================
 
 app = ApplicationBuilder().token(TOKEN).build()
 
-app.add_handler(
-    CommandHandler("seasons", seasons)
-)
+app.add_handler(CommandHandler("seasons", seasons))
+app.add_handler(CommandHandler("rating", rating))
 
-app.add_handler(
-    CommandHandler("rating", rating)
-)
+app.add_handler(CommandHandler("gold1v1", gold1v1))
+app.add_handler(CommandHandler("silver1v1", silver1v1))
+app.add_handler(CommandHandler("bronze1v1", bronze1v1))
 
-app.add_handler(
-    CommandHandler("gold1v1", gold1v1)
-)
+app.add_handler(CommandHandler("gold2v2", gold2v2))
+app.add_handler(CommandHandler("silver2v2", silver2v2))
+app.add_handler(CommandHandler("bronze2v2", bronze2v2))
 
-app.add_handler(
-    CommandHandler("silver1v1", silver1v1)
-)
-
-app.add_handler(
-    CommandHandler("bronze1v1", bronze1v1)
-)
-
-app.add_handler(
-    CommandHandler("gold2v2", gold2v2)
-)
-
-app.add_handler(
-    CommandHandler("silver2v2", silver2v2)
-)
-
-app.add_handler(
-    CommandHandler("bronze2v2", bronze2v2)
-)
-
-print("Bot started")
+print("BOT STARTED")
 
 app.run_polling()
